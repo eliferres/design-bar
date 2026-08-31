@@ -1,0 +1,34 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.9", "3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
+      - name: Lint the shipped rulebooks
+        run: |
+          python tools/dna_lint.py rulebook/TEMPLATE.md
+          python tools/dna_lint.py rulebook/example-dna.md
+      - name: Scan the clean demo page
+        run: python tools/slop_scan.py demo/clean-page.html --tells config/tells.json
+      - name: Demo page test-count claim matches reality
+        run: |
+          count=$(python - <<'PY'
+          import unittest
+          print(unittest.defaultTestLoader.discover("tests").countTestCases())
+          PY
+          )
+          grep -q "${count}/${count}" demo/clean-page.html

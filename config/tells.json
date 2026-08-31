@@ -1,0 +1,23 @@
+{
+  "_note": "Example tells. Every list is yours to tune - these are defaults we kept meeting in AI-generated pages, not a theory of bad design.",
+  "banned_phrases": [
+    "in today's fast-paced world",
+    "unlock the power of",
+    "take your business to the next level",
+    "we've got you covered",
+    "look no further",
+    "game-changing",
+    "revolutionize the way you"
+  ],
+  "flag_lorem": true,
+  "max_emoji_headings": 0,
+  "placeholder_alts": ["image", "photo", "picture", "img", "screenshot"],
+  "default_gradient_pairs": [
+    ["#667eea", "#764ba2"],
+    ["#6a11cb", "#2575fc"],
+    ["#e0c3fc", "#8ec5fc"]
+  ],
+  "max_repeated_shadow": 3,
+  "stock_cta_texts": ["Learn More", "Get Started", "Click Here", "Submit"],
+  "max_stock_ctas": 0
+}
