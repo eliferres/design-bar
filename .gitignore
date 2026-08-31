@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+shots/
+tests/.capture-scratch/
+.DS_Store

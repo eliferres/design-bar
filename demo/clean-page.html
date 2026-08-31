@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="The design bar's worked example: a DNA rulebook builders read before they build, deterministic checkers and a slop scanner after, and a fresh-eyes review panel with a hard round cap.">
+<title>North Star — a page that clears the example bar</title>
+<style>
+  :root {
+    --paper: #faf9f7;
+    --band: #f3efe9;
+    --ink: #211d19;
+    --muted: #6f675e;
+    --accent: #a94e28;
+    --accent-deep: #93431f;
+    --line: #d9d2c7;
+    --measure: 52ch;
+  }
+  /* Type scale (rulebook section 3): 13 label, 16 body, 21 third-level
+     heading, 34 section heading, 68 display. Spacing rides a 4px grid. */
+  * { margin: 0; box-sizing: border-box; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  .display {
+    font-family: Charter, "Iowan Old Style", Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  .brand { display: block; padding: 24px 0; font-size: 21px; line-height: 1.25; }
+  .inner { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+  .hero { padding: 72px 0 72px; }
+  .hero-inner { display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px; }
+  h1 {
+    font-size: 34px;
+    line-height: 1.08;
+    max-width: 16ch;
+    text-wrap: balance;
+    margin: 0 0 24px;
+  }
+  .sub { color: var(--muted); max-width: var(--measure); margin-bottom: 32px; }
+  .cta {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--paper);
+    text-decoration: none;
+    font-size: 16px;
+    padding: 12px 28px;
+    border-radius: 999px;
+    min-height: 44px;
+    transition: background 200ms ease;
+  }
+  .cta:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+  }
+  .proof {
+    background: var(--band);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 32px;
+    align-self: start;
+  }
+  .proof-kicker {
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    line-height: 1.25;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .proof-rows { list-style: none; padding: 0; }
+  .proof-rows li {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 16px;
+    align-items: baseline;
+    color: var(--muted);
+  }
+  .proof-rows li + li { margin-top: 16px; }
+  .proof-n { color: var(--accent); font-size: 21px; line-height: 1.15; text-align: right; }
+  .parts {
+    background: var(--band);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .parts-inner {
+    padding: 64px 24px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .part { border-top: 1px solid var(--line); padding-top: 16px; }
+  .part h2 { font-size: 21px; line-height: 1.25; margin-bottom: 12px; }
+  .part p { color: var(--muted); max-width: var(--measure); }
+  .close { padding: 80px 0 96px; }
+  .close-inner { display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px; align-items: start; }
+  .close h2 {
+    font-size: 26px;
+    line-height: 1.15;
+    max-width: 22ch;
+    text-wrap: balance;
+    margin-bottom: 16px;
+  }
+  .close-actions { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+  .quiet {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .quiet:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+  .close-figure img { width: 100%; height: auto; display: block; }
+  .close p { color: var(--muted); max-width: var(--measure); margin-bottom: 32px; }
+  footer {
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    padding: 28px 0;
+  }
+  footer p { max-width: var(--measure); }
+  @media (min-width: 721px) {
+    h1 { font-size: 48px; }
+    .close h2 { font-size: 34px; }
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .cta:hover { background: var(--accent-deep); }
+    .quiet:hover { text-decoration: underline; }
+  }
+  @media (min-width: 1200px) {
+    h1 { font-size: 68px; }
+    .hero-inner { grid-template-columns: minmax(0, 1fr) 440px; gap: 64px; }
+    .parts-inner { grid-template-columns: repeat(3, 1fr); }
+    .close-inner { grid-template-columns: minmax(0, 1fr) 560px; gap: 64px; }
+  }
+  @media (max-width: 720px) {
+    .hero { padding: 48px 0 52px; }
+    .parts-inner { padding: 48px 24px; }
+  }
+  @media (max-width: 480px) {
+    .close-figure { display: none; }
+    .proof { padding: 24px; }
+    .proof-rows li { grid-template-columns: 1fr; gap: 4px; }
+    .proof-rows li + li { margin-top: 24px; }
+    .proof-n { text-align: left; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cta { transition: none; }
+  }
+</style>
+</head>
+<body>
+<header class="inner"><span class="brand display">design-bar</span></header>
+<main>
+  <section class="hero">
+    <div class="inner hero-inner">
+      <div class="hero-copy">
+        <h1 class="display">Taste you can grade in numbers</h1>
+        <p class="sub">Write the rulebook before anyone builds. Check the
+        build with code. Review the renders with fresh eyes. This page is the
+        worked example: it clears the same bar it describes.</p>
+        <a class="cta" href="https://github.com/eliferres/design-bar/blob/main/rulebook/example-dna.md">Read the rulebook</a>
+      </div>
+      <aside class="proof" aria-label="This repository graded by its own tools">
+        <p class="proof-kicker">Graded by its tools</p>
+        <ul class="proof-rows">
+          <li><span class="proof-n display">9</span><span>gaps in the demo rulebook</span></li>
+          <li><span class="proof-n display">13</span><span>tells on the slop page</span></li>
+          <li><span class="proof-n display">17/17</span><span>tests pass, tree and clone</span></li>
+          <li><span class="proof-n display">4</span><span>widths per review round</span></li>
+          <li><span class="proof-n display">0</span><span>dependencies</span></li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+  <section class="parts">
+    <div class="inner parts-inner">
+      <div class="part">
+        <h2 class="display">Write it down first</h2>
+        <p>A DNA rulebook names the reference, the tokens, the scale, and
+        the anatomy, with provenance on every value. Builders read it
+        before they build.</p>
+      </div>
+      <div class="part">
+        <h2 class="display">Check it in code</h2>
+        <p>Deterministic checkers grade the shipped page against the same
+        numbers: headline economy, motion ceilings, slop tells. Pass or
+        fail, named findings.</p>
+      </div>
+      <div class="part">
+        <h2 class="display">Review it fresh</h2>
+        <p>Four widths, screenshots, and a reviewer who did not build it
+        and never sees the builder's reasoning. Three rounds, then a human
+        calls it.</p>
+      </div>
+    </div>
+  </section>
+  <section class="close">
+    <div class="inner close-inner">
+      <div>
+        <h2 class="display">The bar is written, so the argument is over</h2>
+        <p>When taste lives in a file, a checker, and a review panel, "looks
+        fine to me" stops being the last word.</p>
+        <div class="close-actions">
+          <a class="cta" href="https://github.com/eliferres/design-bar/blob/main/rulebook/example-dna.md">Read the rulebook</a>
+          <a class="quiet" href="https://github.com/eliferres/design-bar">Clone it on GitHub</a>
+        </div>
+      </div>
+      <figure class="close-figure">
+        <img src="terminal.svg" alt="Terminal session: dna_lint refuses the vague demo rulebook with nine named gaps, slop_scan catches thirteen tells on the slop page, and this page passes with CLEAN.">
+      </figure>
+    </div>
+  </section>
+</main>
+<footer><div class="inner"><p>The North Star example page ships with the
+design-bar repository and clears the bar it describes.</p></div></footer>
+</body>
+</html>
