@@ -6,6 +6,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+Nothing yet.
+
+## [1.1.0](https://github.com/eliferres/design-bar/releases/tag/v1.1.0) - 2026-09-03
+
 ### Changed
 - Added stdlib-only, Python 3.9-compatible type hints to every function in dna_lint.py, shot_guard.py, and slop_scan.py, with no behavior change.
 
