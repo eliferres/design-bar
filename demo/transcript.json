@@ -1,0 +1,17 @@
+[
+  {
+    "cmd": "python3 tools/dna_lint.py demo/broken-rulebook.md",
+    "out": "INCOMPLETE - 9 gap(s):\n  - no front-matter block (--- at line 1)\n  - section 'colors' has no provenance marker - tag values with (measured ...), (ruling ...), or an explicit DEEPEN gap",
+    "status": 1
+  },
+  {
+    "cmd": "python3 tools/slop_scan.py demo/slop-page.html --tells config/tells.json",
+    "out": "SLOP - 13 tell(s):\n  - framework-default gradient nobody chose: #667eea + #764ba2\n  - 4 stock call-to-action(s) (limit 0): \"Get Started\", \"Learn More\"",
+    "status": 1
+  },
+  {
+    "cmd": "python3 tools/slop_scan.py demo/clean-page.html --tells config/tells.json",
+    "out": "CLEAN - none of the configured tells present.",
+    "status": 0
+  }
+]
