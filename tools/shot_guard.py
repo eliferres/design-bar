@@ -28,12 +28,15 @@ a PNG this guard cannot read (capture.sh treats 2 as "guard skipped").
 import struct
 import sys
 import zlib
+from typing import List, Tuple
 
 SIGNATURE = b"\x89PNG\r\n\x1a\n"
 CHANNELS = {0: 1, 2: 3, 3: 1, 4: 2, 6: 4}
 
 
-def read_png(path):
+def read_png(
+    path: str,
+) -> Tuple[int, int, int, bytes, List[Tuple[bytes, bytes]]]:
     """Return (width, height, channels, scanline stream, chunk list)."""
     try:
         with open(path, "rb") as fh:
@@ -72,7 +75,7 @@ def read_png(path):
     return width, height, channels, zlib.decompress(b"".join(idat)), chunks
 
 
-def unfilter_row(row, prev, channels):
+def unfilter_row(row: bytes, prev: bytearray, channels: int) -> bytearray:
     """Reconstruct one scanline from its filter byte and raw bytes."""
     kind, line = row[0], bytearray(row[1:])
     stride = len(line)
@@ -109,7 +112,7 @@ def unfilter_row(row, prev, channels):
     return line
 
 
-def bottom_row(width, height, channels, raw):
+def bottom_row(width: int, height: int, channels: int, raw: bytes) -> bytearray:
     """Decode and return the last scanline.
 
     Fast path: walk up from the bottom past 'up'-filtered all-zero rows
@@ -138,7 +141,9 @@ def bottom_row(width, height, channels, raw):
 PAD_ROWS = 48
 
 
-def last_content_row(width, height, channels, raw, anchor):
+def last_content_row(
+    width: int, height: int, channels: int, raw: bytes, anchor: bytes
+) -> int:
     """Walk up from the bottom past rows that render as the anchor color.
 
     Only rows the walk can decode standalone are consumed ('up'-filtered
@@ -162,7 +167,15 @@ def last_content_row(width, height, channels, raw, anchor):
     return y
 
 
-def trim(path, width, height, channels, raw, chunks, anchor):
+def trim(
+    path: str,
+    width: int,
+    height: int,
+    channels: int,
+    raw: bytes,
+    chunks: List[Tuple[bytes, bytes]],
+    anchor: bytes,
+) -> None:
     """Rewrite the PNG so it ends PAD_ROWS below the last content row."""
     keep = min(last_content_row(width, height, channels, raw, anchor)
                + 1 + PAD_ROWS, height)
@@ -189,7 +202,7 @@ def trim(path, width, height, channels, raw, chunks, anchor):
     print(f"trimmed {path}: {height} -> {keep} rows")
 
 
-def main(argv):
+def main(argv: List[str]) -> int:
     args = [a for a in argv[1:] if a != "--trim"]
     do_trim = "--trim" in argv[1:]
     if len(args) != 1:

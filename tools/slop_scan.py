@@ -15,6 +15,7 @@ import json
 import re
 import sys
 from html.parser import HTMLParser
+from typing import Any, Callable, Dict, IO, List, Optional, Tuple
 
 HEADINGS = {"h1", "h2", "h3", "h4", "h5", "h6"}
 CTA_TAGS = {"a", "button"}
@@ -27,7 +28,7 @@ SHADOW = re.compile(r"box-shadow\s*:\s*([^;}]+)", re.IGNORECASE)
 class PageReader(HTMLParser):
     """Collect headings, CTA texts, images, and visible text."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
         self.stack = []
         self.headings = []
@@ -36,14 +37,14 @@ class PageReader(HTMLParser):
         self.text = []
         self._bucket = None
 
-    def handle_starttag(self, tag, attrs):
+    def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
         self.stack.append(tag)
         if tag in HEADINGS or tag in CTA_TAGS:
             self._bucket = []
         if tag == "img":
             self.images.append(dict(attrs))
 
-    def handle_endtag(self, tag):
+    def handle_endtag(self, tag: str) -> None:
         if tag in self.stack:
             self.stack.reverse()
             self.stack.remove(tag)
@@ -57,7 +58,7 @@ class PageReader(HTMLParser):
                 self.ctas.append(record)
             self._bucket = None
 
-    def handle_data(self, data):
+    def handle_data(self, data: str) -> None:
         if "style" in self.stack or "script" in self.stack:
             return
         if self._bucket is not None:
@@ -65,7 +66,7 @@ class PageReader(HTMLParser):
         self.text.append(data)
 
 
-def load(path, reader):
+def load(path: str, reader: Callable[[IO[str]], Any]) -> Any:
     try:
         with open(path, encoding="utf-8") as fh:
             return reader(fh)
@@ -74,19 +75,21 @@ def load(path, reader):
         sys.exit(2)
 
 
-def check_phrases(cfg, text, findings):
+def check_phrases(cfg: Dict[str, Any], text: str, findings: List[str]) -> None:
     lowered = text.lower()
     for phrase in cfg.get("banned_phrases", []):
         if phrase.lower() in lowered:
             findings.append(f'banned phrase present: "{phrase}"')
 
 
-def check_lorem(cfg, text, findings):
+def check_lorem(cfg: Dict[str, Any], text: str, findings: List[str]) -> None:
     if cfg.get("flag_lorem", True) and "lorem ipsum" in text.lower():
         findings.append("placeholder copy: lorem ipsum shipped to a reader")
 
 
-def check_emoji_headings(cfg, headings, findings):
+def check_emoji_headings(
+    cfg: Dict[str, Any], headings: List[Tuple[str, str]], findings: List[str]
+) -> None:
     limit = cfg.get("max_emoji_headings", 0)
     hits = [t for tag, t in headings if t and EMOJI.match(t)]
     if len(hits) > limit:
@@ -96,7 +99,9 @@ def check_emoji_headings(cfg, headings, findings):
         )
 
 
-def check_alt_text(cfg, images, findings):
+def check_alt_text(
+    cfg: Dict[str, Any], images: List[Dict[str, Optional[str]]], findings: List[str]
+) -> None:
     placeholders = {p.lower() for p in cfg.get("placeholder_alts", [])}
     for img in images:
         alt = img.get("alt")
@@ -107,7 +112,7 @@ def check_alt_text(cfg, images, findings):
             findings.append(f'placeholder alt text "{alt}" on {src}')
 
 
-def check_gradients(cfg, html, findings):
+def check_gradients(cfg: Dict[str, Any], html: str, findings: List[str]) -> None:
     lowered = html.lower()
     for pair in cfg.get("default_gradient_pairs", []):
         if all(c.lower() in lowered for c in pair):
@@ -117,7 +122,7 @@ def check_gradients(cfg, html, findings):
             )
 
 
-def check_shadow_soup(cfg, html, findings):
+def check_shadow_soup(cfg: Dict[str, Any], html: str, findings: List[str]) -> None:
     limit = cfg.get("max_repeated_shadow", 3)
     counts = {}
     for match in SHADOW.finditer(html):
@@ -132,7 +137,9 @@ def check_shadow_soup(cfg, html, findings):
             )
 
 
-def check_stock_ctas(cfg, ctas, findings):
+def check_stock_ctas(
+    cfg: Dict[str, Any], ctas: List[Tuple[str, str]], findings: List[str]
+) -> None:
     stock = {s.lower() for s in cfg.get("stock_cta_texts", [])}
     limit = cfg.get("max_stock_ctas", 0)
     hits = [t for _, t in ctas if t.strip().lower() in stock]
@@ -143,7 +150,7 @@ def check_stock_ctas(cfg, ctas, findings):
         )
 
 
-def main(argv):
+def main(argv: List[str]) -> int:
     if len(argv) != 4 or argv[2] != "--tells":
         print("usage: slop_scan.py <page.html> --tells <tells.json>")
         return 2
