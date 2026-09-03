@@ -1,11 +1,6 @@
 # design-bar
 
-Every team has someone with taste. Almost no team can enforce it when
-that person is not in the room. This is the pattern for writing taste
-down until machines and strangers can hold the line: a DNA rulebook
-builders read before they build, deterministic checkers that grade the
-page after, a slop scanner for the defaults nobody chose, and a
-fresh-eyes review panel with a hard round cap.
+Every team has someone with taste. Almost none can enforce it when that person is out of the room. design-bar writes the taste down as a rulebook builders read first, then grades the finished page with deterministic checkers, a slop scanner for defaults nobody chose, and a fresh-eyes review panel with a hard round cap.
 
 <img src="demo/terminal.svg" width="660" alt="Terminal session: dna_lint refuses the vague demo rulebook with nine named gaps, slop_scan catches thirteen tells on the slop page, and the clean page passes with CLEAN.">
 
