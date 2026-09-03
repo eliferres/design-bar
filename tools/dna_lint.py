@@ -13,6 +13,7 @@ Exit codes: 0 = rulebook complete, 1 = gaps found, 2 = usage or IO error.
 
 import re
 import sys
+from typing import Dict, List, Optional, Tuple
 
 REQUIRED_SECTIONS = [
     ("reference", r"reference"),
@@ -44,7 +45,7 @@ URL = re.compile(
 )
 
 
-def read_rulebook(path):
+def read_rulebook(path: str) -> str:
     try:
         with open(path, encoding="utf-8") as fh:
             return fh.read()
@@ -53,7 +54,7 @@ def read_rulebook(path):
         sys.exit(2)
 
 
-def split_sections(text):
+def split_sections(text: str) -> Dict[str, str]:
     """Return {section title lower: body} for every markdown heading."""
     sections = {}
     title = "_preamble"
@@ -70,7 +71,9 @@ def split_sections(text):
     return sections
 
 
-def find_section(sections, pattern):
+def find_section(
+    sections: Dict[str, str], pattern: str
+) -> Tuple[Optional[str], Optional[str]]:
     regex = re.compile(pattern, re.IGNORECASE)
     for title, body in sections.items():
         if regex.search(title):
@@ -78,7 +81,7 @@ def find_section(sections, pattern):
     return None, None
 
 
-def check_front_matter(text, findings):
+def check_front_matter(text: str, findings: List[str]) -> None:
     if not text.startswith("---"):
         findings.append("no front-matter block (--- at line 1)")
         return
@@ -87,14 +90,14 @@ def check_front_matter(text, findings):
         findings.append("front-matter has no version: line")
 
 
-def check_sections(sections, findings):
+def check_sections(sections: Dict[str, str], findings: List[str]) -> None:
     for name, pattern in REQUIRED_SECTIONS:
         title, _ = find_section(sections, pattern)
         if title is None:
             findings.append(f"missing section: {name}")
 
 
-def check_reference(sections, findings):
+def check_reference(sections: Dict[str, str], findings: List[str]) -> None:
     _, body = find_section(sections, r"reference")
     if body is None:
         return
@@ -109,7 +112,9 @@ def check_reference(sections, findings):
         )
 
 
-def check_provenance(sections, findings, deepen_count):
+def check_provenance(
+    sections: Dict[str, str], findings: List[str], deepen_count: List[int]
+) -> None:
     for name in PROVENANCE_SECTIONS:
         pattern = dict(REQUIRED_SECTIONS)[name]
         title, body = find_section(sections, pattern)
@@ -123,7 +128,7 @@ def check_provenance(sections, findings, deepen_count):
         deepen_count[0] += len(re.findall(r"\bDEEPEN\b", body))
 
 
-def check_decision_log(sections, findings):
+def check_decision_log(sections: Dict[str, str], findings: List[str]) -> None:
     title, body = find_section(sections, r"decision log")
     if body is None:
         return
@@ -134,7 +139,7 @@ def check_decision_log(sections, findings):
         )
 
 
-def main(argv):
+def main(argv: List[str]) -> int:
     if len(argv) != 2:
         print("usage: dna_lint.py <rulebook.md>")
         return 2

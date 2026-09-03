@@ -6,6 +6,7 @@ the shipped rulebooks and demo pages ARE the fixtures, so a drift
 between docs and behavior fails here first.
 """
 
+import importlib.util
 import os
 import struct
 import subprocess
@@ -21,6 +22,17 @@ SLOP_SCAN = ROOT / "tools" / "slop_scan.py"
 CAPTURE = ROOT / "tools" / "capture.sh"
 SHOT_GUARD = ROOT / "tools" / "shot_guard.py"
 TELLS = ROOT / "config" / "tells.json"
+
+
+def _load_module(name, path):
+    """Import a tool module directly, for white-box row-level assertions."""
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+shot_guard = _load_module("shot_guard", SHOT_GUARD)
 
 
 def run(*args, env=None):
@@ -183,6 +195,141 @@ class TestShotGuard(unittest.TestCase):
         self.assertIn("trimmed", result.stdout)
         height = struct.unpack(">I", written[0][20:24])[0]
         self.assertEqual(height, 50)
+
+    def test_truncated_file_exits_2(self):
+        # A PNG cut off before its IDAT/IEND chunks land: no pixel data to
+        # decode. read_png's own "malformed PNG" branch should catch this
+        # rather than the guard crashing on a truncated chunk read.
+        ink, paper = (33, 29, 25), (250, 249, 247)
+        full = make_png([[ink] * 8] * 4 + [[paper] * 8] * 4)
+        ihdr_end = 8 + 8 + 13 + 4  # signature + IHDR chunk header/body/crc
+        truncated = full[:ihdr_end]
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as fh:
+            fh.write(truncated)
+            path = fh.name
+        try:
+            result = run(sys.executable, str(SHOT_GUARD), path)
+            self.assertEqual(result.returncode, 2, result.stdout)
+        finally:
+            os.unlink(path)
+
+
+def paeth_predictor(left, above, upper_left):
+    estimate = left + above - upper_left
+    da = abs(estimate - left)
+    db = abs(estimate - above)
+    dc = abs(estimate - upper_left)
+    if da <= db and da <= dc:
+        return left
+    if db <= dc:
+        return above
+    return upper_left
+
+
+def encode_filtered_png(rows, channels, filter_types):
+    """Build a PNG whose scanlines use the given PNG filter type per row.
+
+    rows: list of rows, each a flat list of raw byte values (already the
+    reconstructed pixel bytes, length width*channels). filter_types: one
+    PNG filter type (0-4) per row, applied against the row above (an
+    all-zero row for row 0), exactly as encoders and shot_guard's own
+    unfilter_row are expected to agree on.
+    """
+    width = len(rows[0]) // channels
+    height = len(rows)
+    stride = width * channels
+    filtered = bytearray()
+    prev = [0] * stride
+    for cur, ftype in zip(rows, filter_types):
+        frow = bytearray(stride)
+        for i in range(stride):
+            left = cur[i - channels] if i >= channels else 0
+            up = prev[i]
+            upper_left = prev[i - channels] if i >= channels else 0
+            if ftype == 0:
+                predictor = 0
+            elif ftype == 1:
+                predictor = left
+            elif ftype == 2:
+                predictor = up
+            elif ftype == 3:
+                predictor = (left + up) // 2
+            elif ftype == 4:
+                predictor = paeth_predictor(left, up, upper_left)
+            else:
+                raise ValueError(f"unsupported filter type {ftype}")
+            frow[i] = (cur[i] - predictor) & 0xFF
+        filtered.append(ftype)
+        filtered.extend(frow)
+        prev = cur
+
+    def chunk(ctype, body):
+        payload = ctype + body
+        return struct.pack(">I", len(body)) + payload + struct.pack(
+            ">I", zlib.crc32(payload)
+        )
+
+    return (
+        b"\x89PNG\r\n\x1a\n"
+        + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0))
+        + chunk(b"IDAT", zlib.compress(bytes(filtered)))
+        + chunk(b"IEND", b"")
+    )
+
+
+class TestShotGuardFilters(unittest.TestCase):
+    """One test per PNG filter type (0-4), decoded through shot_guard's
+    own unfilter_row rather than the CLI, so a wrong reconstruction shows
+    up as a byte mismatch instead of a passing-by-accident exit code."""
+
+    CHANNELS = 3
+    ROW0 = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120]
+    ROW1 = [15, 25, 35, 45, 55, 65, 75, 85, 95, 105, 115, 125]
+
+    def decode(self, filter_types):
+        png = encode_filtered_png(
+            [self.ROW0, self.ROW1], self.CHANNELS, filter_types
+        )
+        width, height, channels, raw, _chunks = shot_guard.read_png(
+            self._write(png)
+        )
+        stride = width * channels
+        row_len = 1 + stride
+        prev = bytearray(stride)
+        decoded = []
+        for y in range(height):
+            row = raw[y * row_len:(y + 1) * row_len]
+            prev = shot_guard.unfilter_row(row, prev, channels)
+            decoded.append(list(prev))
+        return decoded
+
+    def _write(self, data):
+        with tempfile.NamedTemporaryFile(
+            suffix=".png", delete=False
+        ) as fh:
+            fh.write(data)
+            self.addCleanup(os.unlink, fh.name)
+            return fh.name
+
+    def test_filter_type_0_none(self):
+        decoded = self.decode([0, 0])
+        self.assertEqual(decoded[1], self.ROW1)
+
+    def test_filter_type_1_sub(self):
+        decoded = self.decode([0, 1])
+        self.assertEqual(decoded[1], self.ROW1)
+
+    def test_filter_type_2_up(self):
+        decoded = self.decode([0, 2])
+        self.assertEqual(decoded[1], self.ROW1)
+
+    def test_filter_type_3_average(self):
+        decoded = self.decode([0, 3])
+        self.assertEqual(decoded[1], self.ROW1)
+
+    def test_filter_type_4_paeth(self):
+        decoded = self.decode([0, 4])
+        self.assertEqual(decoded[1], self.ROW1)
 
 
 class TestDemoHygiene(unittest.TestCase):
