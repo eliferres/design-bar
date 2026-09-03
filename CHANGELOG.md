@@ -11,6 +11,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - Added one in-memory PNG test per filter type (0 through 4), plus a truncated-file case, for shot_guard's PNG decoder.
+- Added macos-latest to the CI matrix alongside ubuntu-latest.
 
 ## [1.0.0](https://github.com/eliferres/design-bar/releases/tag/v1.0.0) - 2026-08-31
 
