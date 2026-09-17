@@ -8,6 +8,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - Install with `pipx install git+https://github.com/eliferres/design-bar` and run `dna-lint`, `slop-scan` and `shot-guard` as commands from any directory, each answering `--version`.
+- A receipt beside the demo screenshot records the exact shot file and the test count printed on the page it was taken from, and a test in the suite fails when the picture, the page's number and the real size of the suite stop agreeing. The page and its screenshot now read 29/29, the size of the suite with that test in it.
 
 ### Fixed
 - The demo transcript now carries the full output and real exit code of every walkthrough command, recorded from a real run and held there by a test that replays them; the terminal picture shows the first of those commands complete.
