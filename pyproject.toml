@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "design-bar"
+dynamic = ["version"]
+description = "Write design taste down as a rulebook, then grade the built page with deterministic checkers."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [{ name = "Eli Ferres" }]
+
+[project.urls]
+Source = "https://github.com/eliferres/design-bar"
+Changelog = "https://github.com/eliferres/design-bar/blob/main/CHANGELOG.md"
+
+[project.scripts]
+dna-lint = "dna_lint:main"
+slop-scan = "slop_scan:main"
+shot-guard = "shot_guard:main"
+
+[tool.setuptools]
+py-modules = ["dna_lint", "slop_scan", "shot_guard"]
+package-dir = { "" = "tools" }
+
+[tool.setuptools.dynamic]
+version = { attr = "slop_scan.__version__" }

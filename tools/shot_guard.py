@@ -25,10 +25,13 @@ bottom row (raise DESIGN_BAR_HEIGHT and recapture), 2 = usage error or
 a PNG this guard cannot read (capture.sh treats 2 as "guard skipped").
 """
 
+__version__ = "1.1.0"
+
+import os
 import struct
 import sys
 import zlib
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 SIGNATURE = b"\x89PNG\r\n\x1a\n"
 CHANNELS = {0: 1, 2: 3, 3: 1, 4: 2, 6: 4}
@@ -202,11 +205,18 @@ def trim(
     print(f"trimmed {path}: {height} -> {keep} rows")
 
 
-def main(argv: List[str]) -> int:
+def main(argv: Optional[List[str]] = None) -> int:
+    # The console script calls main() with nothing; name the command the way
+    # it was invoked, so an installed run never prints the source filename.
+    argv = list(sys.argv) if argv is None else list(argv)
+    prog = os.path.basename(argv[0]) or "shot-guard"
+    if argv[1:] == ["--version"]:
+        print(f"{prog} {__version__}")
+        return 0
     args = [a for a in argv[1:] if a != "--trim"]
     do_trim = "--trim" in argv[1:]
     if len(args) != 1:
-        print("usage: shot_guard.py [--trim] <shot.png>")
+        print(f"usage: {prog} [--trim] <shot.png>")
         return 2
     path = args[0]
     width, height, channels, raw, chunks = read_png(path)
