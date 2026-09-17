@@ -12,6 +12,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 - The demo transcript now carries the full output and real exit code of every walkthrough command, recorded from a real run and held there by a test that replays them; the terminal picture shows the first of those commands complete.
 - The demo page's test-count claim reads 27/27, the real size of the suite, and its screenshot was re-captured from the fixed page.
+- The demo picture no longer cuts its long lines off at the right edge: rows wider than the box ran past it mid-word with no ellipsis. Only the drawing changed; the recorded session is untouched, and the demo page's screenshot was re-captured so page and picture agree.
 
 ## [1.1.0](https://github.com/eliferres/design-bar/releases/tag/v1.1.0) - 2026-09-03
 
