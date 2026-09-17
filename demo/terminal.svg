@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 972" role="img" aria-labelledby="t d" font-family="SF Mono, Menlo, Consolas, monospace" font-size="20">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 556" role="img" aria-labelledby="t d" font-family="SF Mono, Menlo, Consolas, monospace" font-size="20">
   <title id="t">design-bar demo terminal</title>
-  <desc id="d">A terminal session: dna_lint refuses a vague rulebook with nine named gaps, then slop_scan starts naming the thirteen tells on the slop page. The window holds the first part of the session; long commands wrap with a backslash continuation, long report lines are shortened, trims marked with dots.</desc>
+  <desc id="d">A terminal session: dna_lint is run on the vague demo rulebook and refuses it, naming all nine gaps, from the missing front-matter block to the decision log with no dated entry.</desc>
   <style>
     .p { fill: #7ee2a8; }
     .cmd { fill: #e8eef5; }
@@ -8,7 +8,7 @@
     .bad { fill: #ff9494; }
     .good { fill: #7ee2a8; }
   </style>
-  <rect width="660" height="972" rx="14" fill="#0b0f14"/>
+  <rect width="660" height="556" rx="14" fill="#0b0f14"/>
   <rect width="660" height="40" rx="14" fill="#11161d"/>
   <rect y="26" width="660" height="14" fill="#11161d"/>
   <circle cx="26" cy="20" r="6" fill="#ff5f57"/>
@@ -30,17 +30,4 @@
   <text x="24" y="464" class="dim">  - decision log has no dated entry (every ruling lands her…</text>
   <text x="24" y="496" class="dim">An incomplete rulebook is a taste guess waiting to happen.</text>
   <text x="24" y="528" class="dim">Close the gaps before anyone builds against it.</text>
-  <text x="24" y="560"><tspan class="p">$</tspan><tspan class="cmd" dx="8">python3 tools/slop_scan.py demo/slop-page.html --tells \</tspan></text>
-  <text x="24" y="592" class="cmd">    config/tells.json</text>
-  <text x="24" y="624" class="dim">slop-scan report</text>
-  <text x="24" y="656" class="dim">page:  demo/slop-page.html</text>
-  <text x="24" y="688" class="dim">tells: config/tells.json</text>
-  <text x="24" y="720" class="dim">SLOP - 13 tell(s):</text>
-  <text x="24" y="752" class="dim">  - banned phrase present: &quot;in today's fast-paced world&quot;</text>
-  <text x="24" y="784" class="dim">  - banned phrase present: &quot;unlock the power of&quot;</text>
-  <text x="24" y="816" class="dim">  - banned phrase present: &quot;take your business to the next…</text>
-  <text x="24" y="848" class="dim">  - banned phrase present: &quot;we've got you covered&quot;</text>
-  <text x="24" y="880" class="dim">  - banned phrase present: &quot;game-changing&quot;</text>
-  <text x="24" y="912" class="dim">  - banned phrase present: &quot;revolutionize the way you&quot;</text>
-  <text x="24" y="944" class="dim">  - placeholder copy: lorem ipsum shipped to a reader</text>
 </svg>
