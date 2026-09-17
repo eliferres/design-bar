@@ -2,7 +2,7 @@
 
 Every team has someone with taste. Almost none can enforce it when that person is out of the room. design-bar writes the taste down as a rulebook builders read first, then grades the finished page with deterministic checkers, a slop scanner for defaults nobody chose, and a fresh-eyes review panel with a hard round cap.
 
-<img src="demo/terminal.svg" width="660" alt="Terminal session: dna_lint refuses the vague demo rulebook with nine named gaps, slop_scan catches thirteen tells on the slop page, and the clean page passes with CLEAN.">
+<img src="demo/terminal.svg" width="660" alt="Terminal session: dna_lint refuses the vague demo rulebook with nine named gaps, then slop_scan starts naming the thirteen tells it found on the slop page.">
 
 ![CI status](https://github.com/eliferres/design-bar/actions/workflows/ci.yml/badge.svg)
 
