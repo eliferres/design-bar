@@ -1,17 +1,17 @@
 [
   {
     "cmd": "python3 tools/dna_lint.py demo/broken-rulebook.md",
-    "out": "INCOMPLETE - 9 gap(s):\n  - no front-matter block (--- at line 1)\n  - section 'colors' has no provenance marker - tag values with (measured ...), (ruling ...), or an explicit DEEPEN gap",
+    "out": "dna-lint report\nrulebook: demo/broken-rulebook.md\n\nINCOMPLETE - 9 gap(s):\n  - no front-matter block (--- at line 1)\n  - missing section: reference\n  - missing section: type scale\n  - missing section: spacing and shape\n  - missing section: component anatomy\n  - missing section: hygiene\n  - section 'colors' has no provenance marker - tag values with (measured ...), (ruling ...), or an explicit DEEPEN gap\n  - section 'motion' has no provenance marker - tag values with (measured ...), (ruling ...), or an explicit DEEPEN gap\n  - decision log has no dated entry (every ruling lands here as '- YYYY-MM-DD (who): what was decided')\n\nAn incomplete rulebook is a taste guess waiting to happen.\nClose the gaps before anyone builds against it.",
     "status": 1
   },
   {
     "cmd": "python3 tools/slop_scan.py demo/slop-page.html --tells config/tells.json",
-    "out": "SLOP - 13 tell(s):\n  - framework-default gradient nobody chose: #667eea + #764ba2\n  - 4 stock call-to-action(s) (limit 0): \"Get Started\", \"Learn More\"",
+    "out": "slop-scan report\npage:  demo/slop-page.html\ntells: config/tells.json\n\nSLOP - 13 tell(s):\n  - banned phrase present: \"in today's fast-paced world\"\n  - banned phrase present: \"unlock the power of\"\n  - banned phrase present: \"take your business to the next level\"\n  - banned phrase present: \"we've got you covered\"\n  - banned phrase present: \"game-changing\"\n  - banned phrase present: \"revolutionize the way you\"\n  - placeholder copy: lorem ipsum shipped to a reader\n  - 4 heading(s) open with emoji (limit 0): first is \"🚀 Blazing performance\"\n  - placeholder alt text \"image\" on placeholder.png\n  - image without alt text: placeholder2.png\n  - framework-default gradient nobody chose: #667eea + #764ba2\n  - the same box-shadow appears 4 times (limit 3): 0 4px 6px rgba(0, 0, 0, 0.1) - one elevation for everything is a tell, not a system\n  - 4 stock call-to-action(s) (limit 0): \"Get Started\", \"Learn More\"",
     "status": 1
   },
   {
     "cmd": "python3 tools/slop_scan.py demo/clean-page.html --tells config/tells.json",
-    "out": "CLEAN - none of the configured tells present.",
+    "out": "slop-scan report\npage:  demo/clean-page.html\ntells: config/tells.json\n\nCLEAN - none of the configured tells present.\nThat clears the floor, not the bar: a page can pass every\nmechanical tell and still be dull. The review panel judges that.",
     "status": 0
   }
 ]
