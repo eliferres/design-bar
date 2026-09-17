@@ -11,6 +11,9 @@ written down properly.
 Exit codes: 0 = rulebook complete, 1 = gaps found, 2 = usage or IO error.
 """
 
+__version__ = "1.1.0"
+
+import os
 import re
 import sys
 from typing import Dict, List, Optional, Tuple
@@ -139,9 +142,16 @@ def check_decision_log(sections: Dict[str, str], findings: List[str]) -> None:
         )
 
 
-def main(argv: List[str]) -> int:
+def main(argv: Optional[List[str]] = None) -> int:
+    # The console script calls main() with nothing; name the command the way
+    # it was invoked, so an installed run never prints the source filename.
+    argv = list(sys.argv) if argv is None else list(argv)
+    prog = os.path.basename(argv[0]) or "dna-lint"
+    if argv[1:] == ["--version"]:
+        print(f"{prog} {__version__}")
+        return 0
     if len(argv) != 2:
-        print("usage: dna_lint.py <rulebook.md>")
+        print(f"usage: {prog} <rulebook.md>")
         return 2
     path = argv[1]
     text = read_rulebook(path)

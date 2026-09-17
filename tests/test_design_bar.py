@@ -332,6 +332,17 @@ class TestShotGuardFilters(unittest.TestCase):
         self.assertEqual(decoded[1], self.ROW1)
 
 
+class TestVersion(unittest.TestCase):
+    def test_all_three_tools_carry_the_same_version(self):
+        # pyproject reads the packaged version from slop_scan alone, so a
+        # drift between the three constants would ship a lying --version.
+        versions = {
+            name: _load_module(name, ROOT / "tools" / f"{name}.py").__version__
+            for name in ("dna_lint", "slop_scan", "shot_guard")
+        }
+        self.assertEqual(len(set(versions.values())), 1, versions)
+
+
 class TestDemoHygiene(unittest.TestCase):
     def test_both_demo_pages_carry_viewport_meta(self):
         for name in ("clean-page.html", "slop-page.html"):
