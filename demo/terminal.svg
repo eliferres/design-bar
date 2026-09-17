@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 556" role="img" aria-labelledby="t d" font-family="SF Mono, Menlo, Consolas, monospace" font-size="20">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 492" role="img" aria-labelledby="t d" font-family="SF Mono, Menlo, Consolas, monospace" font-size="16">
   <title id="t">design-bar demo terminal</title>
   <desc id="d">A terminal session: dna_lint is run on the vague demo rulebook and refuses it, naming all nine gaps, from the missing front-matter block to the decision log with no dated entry.</desc>
   <style>
@@ -8,26 +8,26 @@
     .bad { fill: #ff9494; }
     .good { fill: #7ee2a8; }
   </style>
-  <rect width="660" height="556" rx="14" fill="#0b0f14"/>
+  <rect width="660" height="492" rx="14" fill="#0b0f14"/>
   <rect width="660" height="40" rx="14" fill="#11161d"/>
   <rect y="26" width="660" height="14" fill="#11161d"/>
   <circle cx="26" cy="20" r="6" fill="#ff5f57"/>
   <circle cx="48" cy="20" r="6" fill="#febc2e"/>
   <circle cx="70" cy="20" r="6" fill="#28c840"/>
   <text x="92" y="26" class="dim" font-size="14">design-bar</text>
-  <text x="24" y="80"><tspan class="p">$</tspan><tspan class="cmd" dx="8">python3 tools/dna_lint.py demo/broken-rulebook.md</tspan></text>
-  <text x="24" y="112" class="dim">dna-lint report</text>
-  <text x="24" y="144" class="dim">rulebook: demo/broken-rulebook.md</text>
-  <text x="24" y="176" class="dim">INCOMPLETE - 9 gap(s):</text>
-  <text x="24" y="208" class="dim">  - no front-matter block (--- at line 1)</text>
-  <text x="24" y="240" class="bad">  - missing section: reference</text>
-  <text x="24" y="272" class="bad">  - missing section: type scale</text>
-  <text x="24" y="304" class="bad">  - missing section: spacing and shape</text>
-  <text x="24" y="336" class="bad">  - missing section: component anatomy</text>
-  <text x="24" y="368" class="bad">  - missing section: hygiene</text>
-  <text x="24" y="400" class="dim">  - section 'colors' has no provenance marker - tag values…</text>
-  <text x="24" y="432" class="dim">  - section 'motion' has no provenance marker - tag values…</text>
-  <text x="24" y="464" class="dim">  - decision log has no dated entry (every ruling lands her…</text>
-  <text x="24" y="496" class="dim">An incomplete rulebook is a taste guess waiting to happen.</text>
-  <text x="24" y="528" class="dim">Close the gaps before anyone builds against it.</text>
+  <text x="24" y="72"><tspan class="p">$</tspan><tspan class="cmd" dx="8">python3 tools/dna_lint.py demo/broken-rulebook.md</tspan></text>
+  <text x="24" y="100" class="dim">dna-lint report</text>
+  <text x="24" y="128" class="dim">rulebook: demo/broken-rulebook.md</text>
+  <text x="24" y="156" class="dim">INCOMPLETE - 9 gap(s):</text>
+  <text x="24" y="184" class="dim">  - no front-matter block (--- at line 1)</text>
+  <text x="24" y="212" class="bad">  - missing section: reference</text>
+  <text x="24" y="240" class="bad">  - missing section: type scale</text>
+  <text x="24" y="268" class="bad">  - missing section: spacing and shape</text>
+  <text x="24" y="296" class="bad">  - missing section: component anatomy</text>
+  <text x="24" y="324" class="bad">  - missing section: hygiene</text>
+  <text x="24" y="352" class="dim">  - section 'colors' has no provenance marker - tag values…</text>
+  <text x="24" y="380" class="dim">  - section 'motion' has no provenance marker - tag values…</text>
+  <text x="24" y="408" class="dim">  - decision log has no dated entry (every ruling lands her…</text>
+  <text x="24" y="436" class="dim">An incomplete rulebook is a taste guess waiting to happen.</text>
+  <text x="24" y="464" class="dim">Close the gaps before anyone builds against it.</text>
 </svg>
