@@ -105,42 +105,74 @@ class TestTranscript(unittest.TestCase):
             )
 
 
+def rejoin(chunks):
+    """Undo the drawing's wrapping: a wrapped row ends in " \\" and the chunks
+    rejoin with the one space the break ate."""
+    return " ".join(c[:-2] if c.endswith(" \\") else c for c in chunks)
+
+
+def shows_whole(drawn, line):
+    """A row is the output line itself, or that line cut once at the end."""
+    if drawn == line:
+        return True
+    head = drawn[: -len(ELLIPSIS)]
+    return (
+        drawn.endswith(ELLIPSIS)
+        and drawn.count(ELLIPSIS) == 1
+        and len(head) < len(line)
+        and line.startswith(head)
+    )
+
+
 class TestPicture(unittest.TestCase):
-    """Nothing is drawn in the picture that the transcript cannot account for."""
+    """The picture shows whole entries: nothing invented, nothing left out.
+
+    It fits as many whole commands as it can and may stop before the last
+    entry, but only between commands, and every output line of an entry it
+    does show is drawn, in order.
+    """
 
     @classmethod
     def setUpClass(cls):
         cls.transcript = load_transcript()
         cls.rows = picture_rows()
 
-    def test_commands_rebuild_the_transcript_commands_in_order(self):
-        rebuilt = []
-        for kind, drawn in self.rows:
-            if kind == "cmd":
-                rebuilt.append([drawn])
-            elif kind == "cont":
-                rebuilt[-1].append(drawn[4:])
-        # A wrapped command breaks at a space and marks the break with " \".
-        joined = [" ".join(c[:-2] if c.endswith(" \\") else c for c in chunks)
-                  for chunks in rebuilt]
-        expected = [entry["cmd"] for entry in self.transcript]
-        self.assertEqual(joined, expected[: len(joined)])
-
-    def test_every_output_row_is_a_prefix_of_a_recorded_line(self):
-        real = [
-            line
-            for entry in self.transcript
-            for line in entry["out"].splitlines()
-            if line.strip()
-        ]
-        for kind, drawn in self.rows:
-            if kind != "out":
-                continue
-            head = drawn[: -len(ELLIPSIS)] if drawn.endswith(ELLIPSIS) else drawn
-            self.assertTrue(
-                any(line == drawn or line.startswith(head) for line in real),
-                f"picture row not in the transcript: {drawn!r}",
+    def test_the_picture_shows_whole_entries_in_order(self):
+        self.assertTrue(self.rows, "the picture has no session rows")
+        index = 0
+        for entry in self.transcript:
+            if index == len(self.rows):
+                break  # the picture stopped at a command boundary
+            kind, drawn = self.rows[index]
+            self.assertEqual(kind, "cmd", f"row {index + 1} should open {entry['cmd']}")
+            chunks = [drawn]
+            index += 1
+            while index < len(self.rows) and self.rows[index][0] == "cont":
+                chunks.append(self.rows[index][1][4:])
+                index += 1
+            self.assertEqual(
+                rejoin(chunks), entry["cmd"],
+                "the command rows do not rebuild the recorded command",
             )
+            for line in [l for l in entry["out"].splitlines() if l.strip()]:
+                self.assertLess(
+                    index, len(self.rows),
+                    f"the picture stops inside {entry['cmd']}, before {line!r}",
+                )
+                kind, drawn = self.rows[index]
+                self.assertEqual(
+                    kind, "out", f"row {index + 1} should be output line {line!r}"
+                )
+                self.assertTrue(
+                    shows_whole(drawn, line),
+                    f"row {index + 1} is {drawn!r}, expected {line!r} whole or "
+                    "end-trimmed with one ellipsis",
+                )
+                index += 1
+        self.assertEqual(
+            index, len(self.rows),
+            f"{len(self.rows) - index} drawn row(s) the transcript does not account for",
+        )
 
 
 if __name__ == "__main__":
