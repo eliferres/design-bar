@@ -6,7 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
-Nothing yet.
+### Added
+- Install with `pipx install git+https://github.com/eliferres/design-bar` and run `dna-lint`, `slop-scan` and `shot-guard` as commands from any directory, each answering `--version`.
 
 ## [1.1.0](https://github.com/eliferres/design-bar/releases/tag/v1.1.0) - 2026-09-03
 

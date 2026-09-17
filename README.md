@@ -13,12 +13,29 @@ from `rulebook/example-dna.md`:
 
 ## Quick start
 
+Install the three checkers:
+
+```bash
+pipx install git+https://github.com/eliferres/design-bar
+```
+
+That installs `dna-lint`, `slop-scan` and `shot-guard` straight from
+this repo; the tool is not on PyPI. The demo files the commands below
+grade live in the clone:
+
 ```bash
 git clone https://github.com/eliferres/design-bar.git
 cd design-bar
 python3 tools/dna_lint.py demo/broken-rulebook.md
 python3 tools/slop_scan.py demo/slop-page.html --tells config/tells.json
 ```
+
+Installed, those two read `dna-lint demo/broken-rulebook.md` and
+`slop-scan demo/slop-page.html --tells config/tells.json`. Every
+checker takes its rulebook, page and tells file as an explicit path, so
+an installed command works from any directory. `tools/capture.sh` is
+not packaged: run it from a clone, or copy the script next to
+`shot_guard.py`.
 
 Zero dependencies: stdlib Python 3.9+ and plain bash. Both commands
 above fail on purpose - the demo ships a vague rulebook and a sloppy

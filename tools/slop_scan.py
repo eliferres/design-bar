@@ -11,7 +11,10 @@ theory of bad design.
 Exit codes: 0 = clean, 1 = tells found, 2 = usage or IO error.
 """
 
+__version__ = "1.1.0"
+
 import json
+import os
 import re
 import sys
 from html.parser import HTMLParser
@@ -150,9 +153,16 @@ def check_stock_ctas(
         )
 
 
-def main(argv: List[str]) -> int:
+def main(argv: Optional[List[str]] = None) -> int:
+    # The console script calls main() with nothing; name the command the way
+    # it was invoked, so an installed run never prints the source filename.
+    argv = list(sys.argv) if argv is None else list(argv)
+    prog = os.path.basename(argv[0]) or "slop-scan"
+    if argv[1:] == ["--version"]:
+        print(f"{prog} {__version__}")
+        return 0
     if len(argv) != 4 or argv[2] != "--tells":
-        print("usage: slop_scan.py <page.html> --tells <tells.json>")
+        print(f"usage: {prog} <page.html> --tells <tells.json>")
         return 2
     html = load(argv[1], lambda fh: fh.read())
     cfg = load(argv[3], json.load)
