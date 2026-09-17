@@ -11,7 +11,7 @@ from `rulebook/example-dna.md`:
 
 <img src="demo/clean-page-1280.png" width="720" alt="The North Star demo page rendered at desktop width: serif display headline reading 'Taste you can grade in numbers', one terracotta call-to-action, a numbers card grading the repo by its own tools, and a three-column walkthrough of the system on a warm paper background.">
 
-## Quick start
+## Try it
 
 Install the three checkers:
 
@@ -41,7 +41,7 @@ Zero dependencies: stdlib Python 3.9+ and plain bash. Both commands
 above fail on purpose - the demo ships a vague rulebook and a sloppy
 page so you can watch each tool name what is wrong.
 
-## The system, in four parts
+## What's inside
 
 **1. The rulebook comes first.** A design DNA file names the one
 reference the surface copies (with proof it earns the job), the color
@@ -71,7 +71,7 @@ generated design - the default gradient, the same shadow on every box,
 emoji headings, `alt="image"`, stock button text - each a deterministic
 check driven by `config/tells.json`, which is yours to tune.
 
-## The walkthrough
+## A full pass on the demo pages
 
 A vague rulebook, refused with names:
 
