@@ -25,13 +25,20 @@ jobs:
           dna-lint --version
           slop-scan --version
           shot-guard --version
+          never-list --version
           slop-scan demo/clean-page.html --tells config/tells.json
+          never-list rulebook/example-dna.md demo/clean-page.html
       - name: Lint the shipped rulebooks
         run: |
           python tools/dna_lint.py rulebook/TEMPLATE.md
           python tools/dna_lint.py rulebook/example-dna.md
       - name: Scan the clean demo page
         run: python tools/slop_scan.py demo/clean-page.html --tells config/tells.json
+      - name: Check the demo pages against the example never list
+        run: |
+          python tools/never_list.py rulebook/example-dna.md demo/clean-page.html
+          python tools/never_list.py rulebook/example-dna.md demo/slop-page.html && code=0 || code=$?
+          [ "$code" = 1 ] || { echo "the slop page exited $code, expected 1"; exit 1; }
       - name: Demo page test-count claim matches reality
         run: |
           count=$(python - <<'PY'

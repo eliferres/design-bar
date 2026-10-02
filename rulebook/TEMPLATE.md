@@ -63,7 +63,17 @@ each repeated component. Primary action, card, nav, form field, footer.
 
 - Contrast floor, load budget, alt text, viewport. (ruling ...)
 
-## 8. Decision log
+## 8. Never
+
+What this surface must never ship, one ban per bullet: the defaults you
+keep rejecting in review. `tools/never_list.py` turns every ban whose
+words name something it can see in code (a gradient, a large card
+corner, a blur orb, an italic wordmark, a dark data grid, "quoted words"
+in copy) into a check, and lists the rest for a person.
+
+- REPLACE with a ban, for example: Headline copy that says "unlock".
+
+## 9. Decision log
 
 Append-only. Every taste ruling lands here with a date and a why, and is
 never re-litigated. The log is what makes the rulebook a memory instead

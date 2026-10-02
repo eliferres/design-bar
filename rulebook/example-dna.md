@@ -80,7 +80,20 @@ the reference you actually want to be graded against.
   (ruling 2026-08-30: first two match craft_basics; contrast rides the
   review panel because it needs rendering)
 
-## 8. Decision log
+## 8. Never
+
+What this surface must never ship, one ban per bullet.
+`tools/never_list.py` turns every ban whose words name something it can
+see in code into a check, and lists the rest for a person.
+
+- Purple-to-blue gradients behind hero text.
+- Decorative blur orbs floating behind content.
+- Headline copy that says "unlock", "game-changing" or "revolutionize".
+- Stock photos of people pointing at a laptop.
+
+(ruling 2026-10-02: example values)
+
+## 9. Decision log
 
 - 2026-08-30 (author): example bar created to demonstrate the anatomy;
   every value marked as a ruling until someone measures a real

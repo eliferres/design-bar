@@ -19,9 +19,10 @@ Changelog = "https://github.com/eliferres/design-bar/blob/main/CHANGELOG.md"
 dna-lint = "dna_lint:main"
 slop-scan = "slop_scan:main"
 shot-guard = "shot_guard:main"
+never-list = "never_list:main"
 
 [tool.setuptools]
-py-modules = ["dna_lint", "slop_scan", "shot_guard"]
+py-modules = ["dna_lint", "slop_scan", "shot_guard", "never_list"]
 package-dir = { "" = "tools" }
 
 [tool.setuptools.dynamic]

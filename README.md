@@ -15,7 +15,7 @@ Every team has someone with taste. Almost none can enforce it when that person i
 pipx install git+https://github.com/eliferres/design-bar
 ```
 
-That installs `dna-lint`, `slop-scan` and `shot-guard` straight from
+That installs `dna-lint`, `slop-scan`, `shot-guard` and `never-list` straight from
 this repo; the tool is not on PyPI. The demo files the commands below
 grade live in the clone:
 
@@ -71,6 +71,25 @@ decides. The cap is what makes the panel a tool instead of a treadmill.
 generated design - the default gradient, the same shadow on every box,
 emoji headings, `alt="image"`, stock button text - each a deterministic
 check driven by `config/tells.json`, which is yours to tune.
+
+**5. The never list is checked against the code.** Every rulebook can
+carry a "Never" section: the things this surface must not ship, one ban
+per bullet. `tools/never_list.py` reads those bans and turns each one
+whose words name something visible in source into a check, then lists
+the rest for a person instead of dropping them.
+
+| Rule | A ban that mentions | What it catches in the code |
+| --- | --- | --- |
+| `gradient` | gradients | any CSS or Tailwind gradient; only purple-to-blue ones when the ban names purple, violet, indigo, fuchsia or magenta |
+| `large-radius` | rounded-2xl, large corners | `rounded-2xl` and up, or a `border-radius` from 16px (what `rounded-2xl` is) to 99px; a pill is its own shape and passes |
+| `blur-orb` | blur orbs or blobs | `filter: blur()` of 40px or more (Tailwind's `blur-2xl`), or `blur-2xl` on an absolute or round element |
+| `banned-words` | "quoted words" | those words in copy: text nodes and string literals, never class names, ids, URLs or comments |
+| `italic-wordmark` | an italic wordmark or logo | italic type on a selector or class list naming a logo, wordmark or brand |
+| `dark-grid` | a dark grid or table | a dark background (lightness under 25%) on a table, grid or row |
+
+A hit you mean to keep takes a comment on its line or the line above,
+`never-allow: <rule> <reason>`. It is listed with its reason and does
+not fail the run; a comment without a reason lets nothing through.
 
 ## A full pass on the demo pages
 
@@ -158,6 +177,29 @@ That clears the floor, not the bar: a page can pass every
 mechanical tell and still be dull. The review panel judges that.
 ```
 
+The example rulebook's never list, against the slop page:
+
+```bash
+python3 tools/never_list.py rulebook/example-dna.md demo/slop-page.html
+```
+
+```text
+never-list report
+rulebook: rulebook/example-dna.md (4 ban(s))
+targets:  demo/slop-page.html (1 file(s))
+
+BROKEN - 3 finding(s):
+  - [gradient] demo/slop-page.html:13: background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  - [banned-words] demo/slop-page.html:28: Unlock the power of game-changing design
+  - [banned-words] demo/slop-page.html:50: Revolutionize the way you take your business to the next level.
+
+No rule can read these; each needs a person to look:
+  - Stock photos of people pointing at a laptop.
+```
+
+The clean page keeps every checkable ban and exits 0; the stock-photo
+ban is still listed, because no rule can see a photograph's subject.
+
 To finish the loop, capture the clean page at the four review widths and
 hand the shots to someone who did not build it:
 
@@ -182,6 +224,10 @@ bash tools/capture.sh demo/clean-page.html shots/
   Taste does not fully compile.
 - `dna_lint.py` checks anatomy, not truth. Write a wrong measured value
   and it will pass; the linter makes guessing visible, not impossible.
+- `never_list.py` knows six shapes of ban. A ban worded in a way none
+  of them recognize is listed for a person, never guessed at, and a
+  shape it does recognize is matched from source text, so a gradient
+  built in JavaScript at runtime is invisible to it.
 - The tells list is a record of defaults we kept meeting, not a theory
   of bad design. It ages, and it needs tuning to your stack.
 - `capture.sh` needs a Chrome-family browser on the machine, and the
