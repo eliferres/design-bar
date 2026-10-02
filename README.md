@@ -2,18 +2,14 @@
 
 Every team has someone with taste. Almost none can enforce it when that person is out of the room. design-bar writes the taste down as a rulebook builders read first, then grades the finished page with deterministic checkers, a slop scanner for defaults nobody chose, and a fresh-eyes review panel with a hard round cap.
 
+![CI](https://github.com/eliferres/design-bar/actions/workflows/ci.yml/badge.svg)
+![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)
+![Dependencies: none](https://img.shields.io/badge/dependencies-none-brightgreen.svg)
+
 <img src="demo/terminal.svg" width="660" alt="Terminal session: dna_lint is run on the vague demo rulebook and refuses it, naming all nine gaps, from the missing front-matter block to the decision log with no dated entry.">
 
-![CI status](https://github.com/eliferres/design-bar/actions/workflows/ci.yml/badge.svg)
-
-And the page those tools graded - the repo's own worked example, built
-from `rulebook/example-dna.md`:
-
-<img src="demo/clean-page-1280.png" width="720" alt="The North Star demo page rendered at desktop width: serif display headline reading 'Taste you can grade in numbers', one terracotta call-to-action, a numbers card grading the repo by its own tools, and a three-column walkthrough of the system on a warm paper background.">
-
-## Try it
-
-Install the three checkers:
+## Install
 
 ```bash
 pipx install git+https://github.com/eliferres/design-bar
@@ -40,6 +36,11 @@ not packaged: run it from a clone, or copy the script next to
 Zero dependencies: stdlib Python 3.9+ and plain bash. Both commands
 above fail on purpose - the demo ships a vague rulebook and a sloppy
 page so you can watch each tool name what is wrong.
+
+And the page those tools graded - the repo's own worked example, built
+from `rulebook/example-dna.md`:
+
+<img src="demo/clean-page-1280.png" width="720" alt="The North Star demo page rendered at desktop width: serif display headline reading 'Taste you can grade in numbers', one terracotta call-to-action, a numbers card grading the repo by its own tools, and a three-column walkthrough of the system on a warm paper background.">
 
 ## What's inside
 
