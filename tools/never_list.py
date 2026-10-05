@@ -10,9 +10,9 @@ card corner, a blur orb, an italic wordmark, a dark data grid, quoted
 words in copy) becomes a deterministic check; every other ban is printed
 as needing a person, so nothing on the list is silently dropped.
 
-A hit can be let through on purpose with a comment on its line or the
-line above: `never-allow: <rule> <reason>`. It is printed with its
-reason and never changes the exit code.
+A hit can be let through on purpose with a comment on its own line:
+`never-allow: <rule> <reason>`. It never reaches the next line. It is
+printed with its reason and never changes the exit code.
 
 Exit codes: 0 = no ban broken, 1 = a ban broken, 2 = usage or IO error.
 """
