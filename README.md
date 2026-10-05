@@ -85,15 +85,15 @@ no UI file, stops the run with exit 2.
 
 | Rule | A ban that mentions | What it catches in the code |
 | --- | --- | --- |
-| `gradient` | gradients | any CSS or Tailwind gradient; only purple-to-blue ones when the ban names purple, violet, indigo, fuchsia or magenta |
-| `large-radius` | rounded-2xl, large corners | `rounded-2xl` and up, or a `border-radius` from 16px (what `rounded-2xl` is) to 99px; a pill is its own shape and passes |
-| `blur-orb` | blur orbs or blobs | `filter: blur()` of 40px or more (Tailwind's `blur-2xl`), or `blur-2xl` on an absolute or round element |
+| `gradient` | gradients | any CSS gradient, or a Tailwind one (`bg-gradient-to-r`, or `bg-linear-to-r`, `bg-radial`, `bg-conic` in v4); only purple-to-blue ones when the ban names purple, violet, indigo, fuchsia or magenta |
+| `large-radius` | rounded-2xl, large corners | a corner from 16px (what `rounded-2xl` is) to 99px, in any spelling: `rounded-2xl` and up, `rounded-[24px]`, any `border-*-radius` in px or rem, `borderRadius: 24`; a pill is its own shape and passes |
+| `blur-orb` | blur orbs or blobs | `filter: blur()` of 40px or more (Tailwind's `blur-2xl`; `backdrop-filter` is frosted glass and passes), or `blur-2xl` on an absolute or round element |
 | `banned-words` | "quoted words" | those words in copy: text nodes and string literals, never class names, ids, URLs or comments |
 | `italic-wordmark` | an italic wordmark or logo | italic type on a selector or class list naming a logo, wordmark or brand |
-| `dark-grid` | a dark grid or table | a dark background (lightness under 25%) on a table, grid or row |
+| `dark-grid` | a dark grid or table | a dark background (lightness under 25%) on table markup or a class naming a data grid or row; layout utilities such as `flex-row` and `dark:` variants pass |
 
-A hit you mean to keep takes a comment on its line or the line above,
-`never-allow: <rule> <reason>`. It is listed with its reason and does
+A hit you mean to keep takes a comment on its own line,
+`never-allow: <rule> <reason>`; it never reaches the next line. It is listed with its reason and does
 not fail the run; a comment without a reason lets nothing through.
 
 ## A full pass on the demo pages

@@ -89,7 +89,9 @@ def read_bans(path: str) -> List[str]:
 
 HEX = re.compile(r"#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b")
 PURPLE_WORD = re.compile(r"\b(purple|violet|indigo|fuchsia|magenta)\b", re.I)
-TW_GRADIENT = re.compile(r"\b(?:bg-)?gradient-to-[a-z]+\b")
+# v3 spells a gradient bg-gradient-to-r; v4 spells it bg-linear-to-r,
+# bg-linear-45, bg-radial or bg-conic.
+TW_GRADIENT = re.compile(r"\b(?:bg-)?gradient-to-[a-z]+\b|\bbg-(?:linear|radial|conic)\b")
 TW_PURPLE_STOP = re.compile(r"\b(?:from|via|to)-(?:purple|violet|indigo|fuchsia)-\d{2,3}\b")
 CSS_GRADIENT = re.compile(r"\b(?:linear|radial|conic)-gradient\s*\(", re.I)
 STRING_LIT = re.compile(r"\"[^\"\\\n]*(?:\\.[^\"\\\n]*)*\""
@@ -117,12 +119,18 @@ def strip_comments(text: str) -> str:
 
 
 def statements(text: str) -> List[Statement]:
-    """Whitespace-normalised units cut at ; { } and >, each carrying the line it starts on."""
+    """Whitespace-normalised units cut at ; { } and at the > that closes a
+    markup tag, each carrying the line it starts on. A > anywhere else (a
+    child selector, an arrow function inside a JSX attribute) is part of
+    the statement, so a selector or a tag is never cut in half."""
     out: List[Statement] = []
     buf: List[str] = []
     start: Optional[int] = None
     line = 1
-    for ch in strip_comments(text):
+    src = strip_comments(text)
+    in_tag = False
+    depth = 0  # braces inside a tag, as in className={...}
+    for i, ch in enumerate(src):
         if ch == "\n":
             line += 1
             buf.append(" ")
@@ -130,7 +138,20 @@ def statements(text: str) -> List[Statement]:
         if start is None and not ch.isspace():
             start = line
         buf.append(ch)
-        if ch in ";{}>":
+        if ch == "<" and re.match(r"[A-Za-z/!]", src[i + 1:i + 2]):
+            in_tag, depth = True, 0
+            continue
+        if in_tag:
+            if ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth = max(0, depth - 1)
+            elif ch == ">" and depth == 0:
+                in_tag = False
+                out.append({"line": start or line, "text": " ".join("".join(buf).split()), "end": ch})
+                buf, start = [], None
+            continue
+        if ch in ";{}":
             out.append({"line": start or line, "text": " ".join("".join(buf).split()), "end": ch})
             buf, start = [], None
     tail = " ".join("".join(buf).split())
@@ -182,14 +203,14 @@ def copy_spans(text: str) -> List[Span]:
 
 
 def allow_reason(lines: List[str], line_no: int, rule: str) -> Optional[str]:
-    """The reason of a never-allow comment for this rule on the line or the one above."""
-    for i in (line_no - 1, line_no - 2):
-        if 0 <= i < len(lines):
-            m = ALLOW.search(lines[i])
-            if m and m.group(1) == rule:
-                reason = re.sub(r"\s*(\*/\s*\}?|-->)\s*$", "", m.group(2)).strip()
-                if reason:
-                    return reason
+    """The reason of a never-allow comment for this rule on the hit's own line.
+    Same line only: a trailing comment on one line must not reach the next."""
+    if 0 < line_no <= len(lines):
+        m = ALLOW.search(lines[line_no - 1])
+        if m and m.group(1) == rule:
+            reason = re.sub(r"\s*(\*/\s*\}?|-->)\s*$", "", m.group(2)).strip()
+            if reason:
+                return reason
     return None
 
 
@@ -234,12 +255,34 @@ def rule_gradient(stmts: List[Statement], spans: List[Span], ban: str) -> List[H
             and (not purple_only or is_purple(s["text"]))]
 
 
+LENGTH = re.compile(r"(?<![\w.#-])(\d*\.?\d+)(px|rem)\b")
+CSS_RADIUS = re.compile(r"(?<![\w-])border(?:-[a-z]+)*-radius\s*:\s*([^;{}]+)", re.I)
+TW_RADIUS = re.compile(r"\brounded(?:-[a-z]{1,2})?-(?:2xl|3xl|\[(\d*\.?\d+)(px|rem)\])")
+JS_RADIUS = re.compile(r"\bborder(?:[A-Z][a-z]+)*Radius\s*:\s*(?:(\d+(?:\.\d+)?)\b|[\"']([^\"']*)[\"'])")
+
+
+def _is_large(number: float, unit: str) -> bool:
+    """16px (what rounded-2xl is) up to 99px; 1rem is 16px. A pill (999px,
+    9999px, rounded-full) is its own shape, not a card corner."""
+    px = number * 16 if unit == "rem" else number
+    return 16 <= px < 100
+
+
 def rule_large_radius(stmts: List[Statement], spans: List[Span], ban: str) -> List[Hit]:
-    """rounded-2xl and up, or a border-radius from 16px (rounded-2xl) to 99px.
-    A pill (rounded-full, 999px) is its own shape and is not a card corner."""
-    return [(s["line"], s["text"]) for s in stmts
-            if re.search(r"\brounded-(?:2xl|3xl)\b", s["text"])
-            or re.search(r"border-radius:\s*(1[6-9]|[2-9]\d)px\b", s["text"])]
+    """A large card corner in CSS (any border-*-radius, px or rem), a
+    Tailwind class (rounded-2xl and up, rounded-[24px]) or a React style
+    (borderRadius: 24)."""
+    out = []
+    for s in stmts:
+        t = s["text"]
+        css = any(_is_large(float(n), u) for m in CSS_RADIUS.finditer(t) for n, u in LENGTH.findall(m.group(1)))
+        tw = any(m.group(1) is None or _is_large(float(m.group(1)), m.group(2)) for m in TW_RADIUS.finditer(t))
+        js = any(_is_large(float(m.group(1)), "px") if m.group(1)
+                 else any(_is_large(float(n), u) for n, u in LENGTH.findall(m.group(2)))
+                 for m in JS_RADIUS.finditer(t))
+        if css or tw or js:
+            out.append((s["line"], t))
+    return out
 
 
 def rule_blur_orb(stmts: List[Statement], spans: List[Span], ban: str) -> List[Hit]:
@@ -248,7 +291,7 @@ def rule_blur_orb(stmts: List[Statement], spans: List[Span], ban: str) -> List[H
     for s in stmts:
         t = s["text"]
         tw = re.search(r"\bblur-(?:2xl|3xl)\b", t) and re.search(r"\babsolute\b|\brounded-full\b", t)
-        css = re.search(r"filter:\s*blur\(\s*(\d+)px", t)
+        css = re.search(r"(?<![\w-])filter:\s*blur\(\s*(\d+)px", t)  # never backdrop-filter
         if tw or (css and int(css.group(1)) >= 40):
             out.append((s["line"], t))
     return out
@@ -283,8 +326,13 @@ def _in_selector(stmts: List[Statement], selector_test: "re.Pattern[str]",
 
 
 WORDMARK = re.compile(r"logo|wordmark|brand", re.I)
-GRID_WORD = re.compile(r"\btable\b|\bthead\b|\btbody\b|\b(?:tr|td|th)\b|\bgrid\b|\brow\b", re.I)
-DARK_TW = re.compile(r"\bbg-(?:gray|zinc|slate|neutral|stone)-(?:800|900|950)\b|\bbg-black\b")
+# Table markup, or a class or selector naming a data grid or a row. A layout
+# utility (flex-row, grid-cols-3, a bare Tailwind "grid") is not a data grid.
+GRID_WORD = re.compile(r"\b(?:table|thead|tbody|tr|td|th)\b"
+                       r"|(?<![\w-])(?:data-?grid|datagrid|table-row|row)(?![\w-])", re.I)
+# A dark fill, but not one behind a dark: variant: that is a dark mode, not a
+# dark grid on a light page.
+DARK_TW = re.compile(r"(?<![\w:-])bg-(?:gray|zinc|slate|neutral|stone)-(?:800|900|950)\b|(?<![\w:-])bg-black\b")
 
 
 def rule_italic_wordmark(stmts: List[Statement], spans: List[Span], ban: str) -> List[Hit]:

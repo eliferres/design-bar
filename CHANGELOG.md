@@ -7,7 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## Unreleased
 
 ### Added
-- Install with `pipx install git+https://github.com/eliferres/design-bar` and run `dna-lint`, `slop-scan` and `shot-guard` as commands from any directory, each answering `--version`.
+- Install with `pipx install git+https://github.com/eliferres/design-bar` and run `dna-lint`, `slop-scan`, `shot-guard` and `never-list` as commands from any directory, each answering `--version`.
 - A receipt beside the demo screenshot records the exact shot file and the test count printed on the page it was taken from, and a test in the suite fails when the picture, the page's number and the real size of the suite stop agreeing. The page and its screenshot carry the real size of the suite.
 
 - `never-list` checks code against the "Never" section of a rulebook. Bans it can read (gradients, large card corners, blur orbs, quoted words in copy, an italic wordmark, a dark data grid) become checks; the rest are listed for a person. A `never-allow: <rule> <reason>` comment keeps one hit on purpose. The template and the example rulebook gain a "Never" section.

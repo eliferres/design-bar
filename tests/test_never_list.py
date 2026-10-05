@@ -143,6 +143,66 @@ class TestRules(NeverListCase):
         self.assertIn("[dark-grid] page.css:2", result.stdout)
 
 
+class TestRuleEdges(NeverListCase):
+    def test_flex_row_and_dark_mode_variants_are_not_a_dark_grid(self):
+        result = self.check(
+            ["A dark data grid."],
+            {"page.html": '<div class="flex flex-row bg-black">x</div>\n<div class="data-grid dark:bg-gray-900">y</div>\n'},
+        )
+        self.assertEqual(result.returncode, 0, result.stdout)
+
+    def test_a_child_selector_keeps_its_grid_context(self):
+        result = self.check(
+            ["A dark data grid."],
+            {"page.css": ".data-grid > .cell { background: #111111; }\n"},
+        )
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("[dark-grid] page.css:1", result.stdout)
+
+    def test_an_arrow_function_inside_a_tag_does_not_split_it(self):
+        result = self.check(
+            ["A dark data grid."],
+            {"Grid.jsx": '<Table rows={rows.map((r) => r.id)} className="bg-black" />\n'},
+        )
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("[dark-grid] Grid.jsx:1", result.stdout)
+
+    def test_backdrop_filter_is_not_a_blur_orb(self):
+        result = self.check(
+            ["Decorative blur orbs behind content."],
+            {"page.css": ".glass { backdrop-filter: blur(40px); }\n"},
+        )
+        self.assertEqual(result.returncode, 0, result.stdout)
+
+    def test_tailwind_v4_gradients_are_gradients(self):
+        result = self.check(
+            ["Gradients of any kind."],
+            {"page.html": '<div class="bg-linear-to-r from-amber-200 to-rose-300">x</div>\n'},
+        )
+        self.assertEqual(result.returncode, 1, result.stdout)
+
+    def test_large_corners_in_every_spelling(self):
+        result = self.check(
+            ["Rounded-2xl cards."],
+            {"page.html": '<div class="rounded-[24px]">a</div>\n'
+                          "<style>.b { border-radius: 1.5rem; } .c { border-top-left-radius: 20px; } .d { border-radius: 9999px; }</style>\n",
+             "Card.jsx": "export const Card = () => <div style={{ borderRadius: 24 }} />;\n"},
+        )
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("[large-radius] page.html:1", result.stdout)
+        self.assertEqual(result.stdout.count("[large-radius] page.html:2"), 2)
+        self.assertIn("[large-radius] Card.jsx:1", result.stdout)
+
+    def test_an_allow_comment_covers_only_its_own_line(self):
+        result = self.check(
+            ["Gradients of any kind."],
+            {"page.css": ".a { color: red; } /* never-allow: gradient the hero */\n"
+                         ".b { background: linear-gradient(#000, #333); }\n"},
+        )
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("[gradient] page.css:2", result.stdout)
+
+
 class TestHumanChecks(NeverListCase):
     def test_a_ban_no_rule_can_read_is_named_for_a_person_and_does_not_fail(self):
         result = self.check(
@@ -208,12 +268,11 @@ class TestRulebookParsing(NeverListCase):
 
 
 class TestAllowComment(NeverListCase):
-    def test_an_allow_comment_with_a_reason_on_the_line_or_above_lets_the_hit_through(self):
+    def test_an_allow_comment_with_a_reason_on_the_line_lets_the_hit_through(self):
         result = self.check(
             ["Gradients of any kind."],
             {"page.css": """\
-                /* never-allow: gradient the brand's own hero, signed off */
-                .hero { background: linear-gradient(#f6d365, #fda085); }
+                .hero { background: linear-gradient(#f6d365, #fda085); } /* never-allow: gradient the brand's own hero, signed off */
                 .foot { background: linear-gradient(#000, #333); } /* never-allow: gradient print-only footer */
                 """},
         )
