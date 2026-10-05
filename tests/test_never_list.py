@@ -215,6 +215,18 @@ class TestRuleEdges(NeverListCase):
         self.assertEqual(result.returncode, 1, result.stdout)
         self.assertIn("[gradient] page.css:2", result.stdout)
 
+    def test_a_comparison_in_script_is_not_page_text_but_jsx_text_still_is(self):
+        result = self.check(
+            ['Copy that says "unlock".'],
+            {"Gate.tsx": """\
+                if (count > 0) unlock(); if (y < 3) go();
+                export const Gate = () => <h1>Unlock</h1>;
+                """},
+        )
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertNotIn("Gate.tsx:1", result.stdout)
+        self.assertIn("[banned-words] Gate.tsx:2", result.stdout)
+
     def test_an_allow_comment_covers_only_its_own_line(self):
         result = self.check(
             ["Gradients of any kind."],

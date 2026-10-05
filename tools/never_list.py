@@ -97,7 +97,7 @@ CSS_GRADIENT = re.compile(r"\b(?:linear|radial|conic)-gradient\s*\(", re.I)
 STRING_LIT = re.compile(r"\"[^\"\\\n]*(?:\\.[^\"\\\n]*)*\""
                         r"|'[^'\\\n]*(?:\\.[^'\\\n]*)*'"
                         r"|`[^`\\]*(?:\\.[^`\\]*)*`", re.S)
-HTML_TEXT = re.compile(r">([^<>]*)<", re.S)
+TAG_OPEN = re.compile(r"<[A-Za-z/!]")
 # Attributes whose value is an identifier, a URL or a class list. alt,
 # title, placeholder and aria-label are copy and stay in scope.
 NON_COPY_ATTR = re.compile(r"\b(?:class|className|id|href|src|srcSet|rel|type|name|key|role|"
@@ -189,6 +189,29 @@ def _closing(src: str, pos: int) -> int:
     return len(src)
 
 
+def text_nodes(src: str) -> List[Tuple[int, str]]:
+    """(offset, text) of each run between a markup tag's close and the next
+    tag's open. A tag opens at < before a letter, / or ! and closes at the
+    first > outside braces, the rule statements() cuts on, so a comparison
+    such as `count > 0` in script is never page text."""
+    nodes = []
+    after_tag: Optional[int] = None  # where the last tag closed; None before the first
+    for tag in TAG_OPEN.finditer(src):
+        if after_tag is not None:
+            if tag.start() < after_tag:
+                continue  # a < inside the tag just read, as in className={a<b}
+            nodes.append((after_tag, src[after_tag:tag.start()]))
+        depth, i = 0, tag.end()
+        while i < len(src) and (src[i] != ">" or depth > 0):
+            if src[i] == "{":
+                depth += 1
+            elif src[i] == "}":
+                depth = max(0, depth - 1)
+            i += 1
+        after_tag = i + 1
+    return nodes
+
+
 def copy_spans(text: str) -> List[Span]:
     """(line, text) for the two places readable copy ships: a markup text node and a string literal."""
     src = strip_comments(text)
@@ -198,9 +221,9 @@ def copy_spans(text: str) -> List[Span]:
         return any(a <= pos < b for a, b in regions)
 
     spans: List[Span] = []
-    for m in HTML_TEXT.finditer(src):
-        if not in_class_list(m.start(1)):
-            spans.append((src.count("\n", 0, m.start(1)) + 1, m.group(1)))
+    for start, node in text_nodes(src):
+        if not in_class_list(start):
+            spans.append((src.count("\n", 0, start) + 1, node))
     for m in STRING_LIT.finditer(src):
         if in_class_list(m.start()) or NON_COPY_ATTR.search(src[max(0, m.start() - 40):m.start()]):
             continue
