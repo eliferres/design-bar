@@ -259,11 +259,13 @@ def _in_selector(stmts: List[Statement], selector_test: "re.Pattern[str]",
         if s["end"] == "{":
             selector = s["text"]
             continue
+        # A rule's last declaration may omit its semicolon, so the statement
+        # closing the block can still carry one: read it before resetting.
+        text = s["text"][:-1].strip() if s["end"] == "}" else s["text"]
+        if text and declaration_test(text) and selector_test.search(selector + " " + text):
+            out.append((s["line"], text))
         if s["end"] == "}":
             selector = ""
-            continue
-        if declaration_test(s["text"]) and selector_test.search(selector + " " + s["text"]):
-            out.append((s["line"], s["text"]))
     return out
 
 

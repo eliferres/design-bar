@@ -133,6 +133,16 @@ class TestRules(NeverListCase):
         self.assertNotIn("page.css:3", result.stdout)
 
 
+    def test_a_last_declaration_without_a_semicolon_is_still_read(self):
+        result = self.check(
+            ["An italic wordmark.", "A dark data grid."],
+            {"page.css": ".wordmark { font-style: italic }\n.data-grid { color: red; background: #111111 }\n"},
+        )
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("[italic-wordmark] page.css:1", result.stdout)
+        self.assertIn("[dark-grid] page.css:2", result.stdout)
+
+
 class TestHumanChecks(NeverListCase):
     def test_a_ban_no_rule_can_read_is_named_for_a_person_and_does_not_fail(self):
         result = self.check(
