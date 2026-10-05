@@ -286,7 +286,7 @@ def rule_gradient(stmts: List[Statement], spans: List[Span], ban: str) -> List[H
 
 LENGTH = re.compile(r"(?<![\w.#-])(\d*\.?\d+)(px|rem)\b")
 CSS_RADIUS = re.compile(r"(?<![\w-])border(?:-[a-z]+)*-radius\s*:\s*([^;{}]+)", re.I)
-TW_RADIUS = re.compile(r"\brounded(?:-[a-z]{1,2})?-(?:2xl|3xl|\[(\d*\.?\d+)(px|rem)\])")
+TW_RADIUS = re.compile(r"\brounded(?:-[a-z]{1,2})?-(?:[2-9]xl|\[(\d*\.?\d+)(px|rem)\])")
 JS_RADIUS = re.compile(r"\bborder(?:[A-Z][a-z]+)*Radius\s*:\s*(?:(\d+(?:\.\d+)?)\b|[\"']([^\"']*)[\"'])")
 
 

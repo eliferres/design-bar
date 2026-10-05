@@ -237,6 +237,14 @@ class TestRuleEdges(NeverListCase):
         self.assertNotIn("Gate.tsx:1", result.stdout)
         self.assertIn("[banned-words] Gate.tsx:2", result.stdout)
 
+    def test_rounded_4xl_is_a_large_corner(self):
+        result = self.check(
+            ["Rounded-2xl cards."],
+            {"page.html": '<div class="rounded-4xl p-6">card</div>\n'},
+        )
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("[large-radius] page.html:1", result.stdout)
+
     def test_an_allow_comment_covers_only_its_own_line(self):
         result = self.check(
             ["Gradients of any kind."],
