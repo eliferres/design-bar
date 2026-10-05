@@ -197,6 +197,16 @@ class TestRulebookParsing(NeverListCase):
         self.assertIn("no UI files", result.stderr)
 
 
+    def test_a_rulebook_that_is_not_utf8_is_read_without_a_traceback(self):
+        (self.dir / "rulebook.md").write_bytes("# Caf\xe9 book\n\n## Never\n\n- Gradients of any kind.\n".encode("latin-1"))
+        self.write("page.css", ".a { background: linear-gradient(#000, #333); }\n")
+        result = subprocess.run([sys.executable, str(NEVER_LIST), "rulebook.md", "page.css"],
+                                capture_output=True, text=True, cwd=self.dir)
+        self.assertNotIn("Traceback", result.stderr)
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("[gradient]", result.stdout)
+
+
 class TestAllowComment(NeverListCase):
     def test_an_allow_comment_with_a_reason_on_the_line_or_above_lets_the_hit_through(self):
         result = self.check(

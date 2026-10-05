@@ -53,7 +53,9 @@ def read_bans(path: str) -> List[str]:
     the word. It runs to the next heading of the same or a higher level, so
     sub-headings that group the bans stay inside it."""
     try:
-        with open(path, encoding="utf-8") as fh:
+        # Read like the scanned files: a stray Latin-1 byte in a heading is
+        # not a reason to refuse the whole rulebook.
+        with open(path, encoding="utf-8", errors="replace") as fh:
             lines = fh.read().splitlines()
     except OSError as exc:
         raise UsageError(f"cannot read {path}: {exc.strerror}")
