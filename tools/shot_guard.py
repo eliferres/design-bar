@@ -25,7 +25,7 @@ bottom row (raise DESIGN_BAR_HEIGHT and recapture), 2 = usage error or
 a PNG this guard cannot read (capture.sh treats 2 as "guard skipped").
 """
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 import os
 import struct

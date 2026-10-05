@@ -11,7 +11,7 @@ written down properly.
 Exit codes: 0 = rulebook complete, 1 = gaps found, 2 = usage or IO error.
 """
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 import os
 import re

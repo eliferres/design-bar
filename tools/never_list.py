@@ -17,7 +17,7 @@ reason and never changes the exit code.
 Exit codes: 0 = no ban broken, 1 = a ban broken, 2 = usage or IO error.
 """
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 import argparse
 import json
