@@ -41,30 +41,41 @@ class UsageError(Exception):
 
 # ---------------------------------------------------------------- the rulebook
 
+HEADING = re.compile(r"^(#{1,6})\s+(.*?)\s*#*\s*$")
+BULLET = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+(.*\S)")
+
+
 def read_bans(path: str) -> List[str]:
-    """Every bullet under the first heading containing the word "never"."""
+    """Every bullet in the rulebook's Never section.
+
+    The section is the heading whose text is just "Never" (a leading number
+    such as "8." is ignored), or failing that the first heading containing
+    the word. It runs to the next heading of the same or a higher level, so
+    sub-headings that group the bans stay inside it."""
     try:
         with open(path, encoding="utf-8") as fh:
             lines = fh.read().splitlines()
     except OSError as exc:
         raise UsageError(f"cannot read {path}: {exc.strerror}")
+    headings = [(i, len(m.group(1)), m.group(2)) for i, line in enumerate(lines)
+                for m in [HEADING.match(line)] if m]
+    exact = [h for h in headings if re.fullmatch(r"(?:\d+[.)]?\s*)?never", h[2], re.I)]
+    loose = [h for h in headings if re.search(r"\bnever\b", h[2], re.I)]
+    if not (exact or loose):
+        raise UsageError(f"no 'Never' section in {path}")
+    start, level, _ = (exact or loose)[0]
+    stop = next((i for i, lvl, _ in headings if i > start and lvl <= level), len(lines))
     bans: List[str] = []
-    inside = found = False
-    for line in lines:
-        if re.match(r"^#{1,6}\s", line):
-            if found:
-                break
-            inside = found = bool(re.search(r"\bnever\b", line, re.I))
+    for line in lines[start + 1:stop]:
+        if HEADING.match(line):
             continue
-        if not inside:
-            continue
-        bullet = re.match(r"^\s*[-*]\s+(.*\S)", line)
+        bullet = BULLET.match(line)
         if bullet:
             bans.append(bullet.group(1))
         elif line.strip() and bans and line.startswith((" ", "\t")):
             bans[-1] += " " + line.strip()  # a bullet wrapped onto the next line
-    if not found:
-        raise UsageError(f"no 'Never' section in {path}")
+    if not bans:
+        raise UsageError(f"the 'Never' section in {path} lists no bans (one per bullet)")
     return bans
 
 
@@ -323,6 +334,8 @@ def collect(targets: List[str]) -> List[str]:
 def check(rulebook: str, targets: List[str]) -> dict:
     bans = read_bans(rulebook)
     files = collect(targets)
+    if not files:
+        raise UsageError(f"no UI files to check in {', '.join(targets)}")
     parsed = {}
     for path in files:
         try:

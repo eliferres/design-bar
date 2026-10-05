@@ -76,7 +76,12 @@ check driven by `config/tells.json`, which is yours to tune.
 carry a "Never" section: the things this surface must not ship, one ban
 per bullet. `tools/never_list.py` reads those bans and turns each one
 whose words name something visible in source into a check, then lists
-the rest for a person instead of dropping them.
+the rest for a person instead of dropping them. The section is the
+heading that reads just "Never" (a number in front is fine), or else the
+first heading containing the word, down to the next heading of the same
+level; sub-headings inside it can group the bans. `-`, `*`, `+` and
+numbered bullets all count. A section with no bans, or targets holding
+no UI file, stops the run with exit 2.
 
 | Rule | A ban that mentions | What it catches in the code |
 | --- | --- | --- |

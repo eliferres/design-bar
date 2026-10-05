@@ -154,6 +154,49 @@ class TestHumanChecks(NeverListCase):
         self.assertIn("needs a person", result.stdout)
 
 
+class TestRulebookParsing(NeverListCase):
+    def run_book(self, book_text, target_body=".a { background: linear-gradient(#000, #333); }\n"):
+        self.write("rulebook.md", book_text)
+        self.write("page.css", target_body)
+        return subprocess.run([sys.executable, str(NEVER_LIST), "rulebook.md", "page.css"],
+                              capture_output=True, text=True, cwd=self.dir)
+
+    def test_a_heading_that_is_just_never_wins_over_one_that_mentions_it(self):
+        result = self.run_book(
+            "# Book\n\n## Things we never argue about\n\n- Copy that says \"zzz\".\n\n"
+            "## 8. Never\n\n- Gradients of any kind.\n"
+        )
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("[gradient]", result.stdout)
+
+    def test_sub_headings_stay_inside_and_a_sibling_heading_ends_the_section(self):
+        result = self.run_book(
+            "# Book\n\n## Never\n\n### Color\n\n- Gradients of any kind.\n\n### Copy\n\n- No clip art.\n\n"
+            "## Decision log\n\n- Rounded-2xl cards.\n"
+        )
+        self.assertIn("(2 ban(s))", result.stdout)
+        self.assertIn("[gradient]", result.stdout)
+
+    def test_numbered_and_plus_bullets_are_bans(self):
+        result = self.run_book("# Book\n\n## Never\n\n1. Gradients of any kind.\n2) No clip art.\n+ No stock photos.\n")
+        self.assertIn("(3 ban(s))", result.stdout)
+        self.assertIn("[gradient]", result.stdout)
+
+    def test_an_empty_never_section_is_a_usage_error(self):
+        result = self.run_book("# Book\n\n## Never\n\nNothing yet.\n\n## Decision log\n")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("no bans", result.stderr)
+
+    def test_targets_holding_no_ui_file_are_a_usage_error(self):
+        self.write("rulebook.md", rulebook("Gradients of any kind."))
+        (self.dir / "empty").mkdir()
+        self.write("empty/notes.txt", "hello\n")
+        result = subprocess.run([sys.executable, str(NEVER_LIST), "rulebook.md", "empty"],
+                                capture_output=True, text=True, cwd=self.dir)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("no UI files", result.stderr)
+
+
 class TestAllowComment(NeverListCase):
     def test_an_allow_comment_with_a_reason_on_the_line_or_above_lets_the_hit_through(self):
         result = self.check(
