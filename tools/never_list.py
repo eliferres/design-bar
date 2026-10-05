@@ -107,15 +107,21 @@ NON_COPY_ATTR = re.compile(r"\b(?:class|className|id|href|src|srcSet|rel|type|na
 NON_COPY_REGION = re.compile(r"\b(?:className|class)\s*=\s*\{"
                              r"|\b(?:clsx|cn|classnames|classNames|twMerge|cva)\s*\(")
 ALLOW = re.compile(r"never-allow:[ \t]*([\w-]+)[ \t]+(.*)$")
+# One left-to-right pass in which a string literal wins over a comment
+# opener, so content: "/*" opens no comment and "https://x" is kept. A //
+# outside a string opens a comment only after whitespace, ; { } or the
+# start of the file: an unquoted https:// or url(//cdn) is not a comment.
+STRING_OR_COMMENT = re.compile(r"(?P<string>%s)|/\*.*?\*/|<!--.*?-->|(?<![^\s;{}])//[^\n]*"
+                               % STRING_LIT.pattern, re.S)
 
 
 def strip_comments(text: str) -> str:
     """Comments blanked with newlines kept, so line numbers stay the file's own."""
     def blank(m: "re.Match[str]") -> str:
+        if m.group("string") is not None:
+            return m.group(0)
         return re.sub(r"[^\n]", " ", m.group(0))
-    text = re.sub(r"/\*.*?\*/", blank, text, flags=re.S)
-    text = re.sub(r"<!--.*?-->", blank, text, flags=re.S)
-    return re.sub(r"(?m)^[ \t]*//.*$", blank, text)
+    return STRING_OR_COMMENT.sub(blank, text)
 
 
 def statements(text: str) -> List[Statement]:

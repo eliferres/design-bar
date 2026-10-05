@@ -193,6 +193,28 @@ class TestRuleEdges(NeverListCase):
         self.assertEqual(result.stdout.count("[large-radius] page.html:2"), 2)
         self.assertIn("[large-radius] Card.jsx:1", result.stdout)
 
+    def test_a_trailing_line_comment_is_not_copy_but_a_url_in_a_string_is_no_comment(self):
+        result = self.check(
+            ['Copy that says "unlock".'],
+            {"t.tsx": """\
+                const n = 1; // "unlock" your potential
+                const a = "https://x"; const b = '//cdn'; const c = "unlock";
+                """},
+        )
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertNotIn("t.tsx:1", result.stdout)
+        self.assertIn("[banned-words] t.tsx:2", result.stdout)
+
+    def test_a_comment_opener_inside_a_css_string_does_not_swallow_the_next_rule(self):
+        result = self.check(
+            ["Gradients of any kind."],
+            {"page.css": '.q::before { content: "/*"; }\n'
+                         '.hero { background: linear-gradient(#000, #333); }\n'
+                         "/* footer */\n"},
+        )
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("[gradient] page.css:2", result.stdout)
+
     def test_an_allow_comment_covers_only_its_own_line(self):
         result = self.check(
             ["Gradients of any kind."],
