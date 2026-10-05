@@ -174,6 +174,16 @@ class TestRuleEdges(NeverListCase):
         )
         self.assertEqual(result.returncode, 0, result.stdout)
 
+    def test_tailwind_backdrop_blur_is_frosted_glass_and_a_variant_blur_is_an_orb(self):
+        result = self.check(
+            ["Decorative blur orbs behind content."],
+            {"page.html": '<div class="absolute rounded-full backdrop-blur-2xl">glass</div>\n'
+                          '<div class="md:blur-2xl absolute">orb</div>\n'},
+        )
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertNotIn("page.html:1", result.stdout)
+        self.assertIn("[blur-orb] page.html:2", result.stdout)
+
     def test_tailwind_v4_gradients_are_gradients(self):
         result = self.check(
             ["Gradients of any kind."],

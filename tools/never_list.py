@@ -319,7 +319,9 @@ def rule_blur_orb(stmts: List[Statement], spans: List[Span], ban: str) -> List[H
     out = []
     for s in stmts:
         t = s["text"]
-        tw = re.search(r"\bblur-(?:2xl|3xl)\b", t) and re.search(r"\babsolute\b|\brounded-full\b", t)
+        # The class starts a token (or follows a variant such as md:), so
+        # backdrop-blur-2xl, frosted glass, is not a blur orb.
+        tw = re.search(r"(?<![^\s\"'`:])blur-(?:2xl|3xl)\b", t) and re.search(r"\babsolute\b|\brounded-full\b", t)
         css = re.search(r"(?<![\w-])filter:\s*blur\(\s*(\d+)px", t)  # never backdrop-filter
         if tw or (css and int(css.group(1)) >= 40):
             out.append((s["line"], t))
