@@ -2,12 +2,14 @@
 
 design-bar writes a team's taste down as a rulebook builders read first, then grades the finished page with deterministic checkers, a slop scanner and a fresh-eyes review panel.
 
-![CI](https://github.com/eliferres/design-bar/actions/workflows/ci.yml/badge.svg)
-![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
-![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)
-![Dependencies: none](https://img.shields.io/badge/dependencies-none-brightgreen.svg)
+[![ci](https://github.com/eliferres/design-bar/actions/workflows/ci.yml/badge.svg)](https://github.com/eliferres/design-bar/actions/workflows/ci.yml)
+![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+![python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)
+![dependencies: none](https://img.shields.io/badge/dependencies-none-brightgreen.svg)
 
 <img src="demo/terminal.svg" width="660" alt="Terminal session: dna_lint is run on the vague demo rulebook and refuses it, naming all nine gaps, from the missing front-matter block to the decision log with no dated entry.">
+
+The [fde-agent-skills](https://github.com/eliferres/fde-agent-skills) library documents the working methods behind this tool and its sibling tools as agent skills.
 
 ## What it does
 
